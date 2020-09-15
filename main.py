@@ -27,7 +27,6 @@ def main():
     excel_data_df = pandas.read_excel('input_data.xlsx', sheet_name='orders_daily_sample')
     df = step_look_for_delivery_fee_col(excel_data_df)
     sdf = spark.createDataFrame(df)
-    # sdf.show()
     sdf1 = step_adds_week_partition(sdf)
 
     #main aggregation goes here
@@ -192,8 +191,6 @@ def main():
         )
         .alias('order_count_w_packaging_fee')
     )
-
-    sdf2.show()
 
     sdf2.toPandas().to_excel('output1.xlsx', engine='xlsxwriter')
 
