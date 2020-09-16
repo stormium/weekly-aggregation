@@ -1,8 +1,3 @@
-import os
-# Set spark environments
-os.environ['PYSPARK_PYTHON'] = '/usr/bin/python3.8'
-os.environ['PYSPARK_DRIVER_PYTHON'] = '/usr/bin/python3.8'
-
 import pandas
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
