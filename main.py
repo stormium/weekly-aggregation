@@ -192,8 +192,9 @@ def main():
     df = step_look_for_delivery_fee_col(excel_data_df)
     sdf = spark.createDataFrame(df)
     sdf = step_adds_week_partition(sdf)
-    sdf.show()
     sdf = step_main_aggr(sdf)
+
+    sdf.show()
     sdf.toPandas().to_excel('output1.xlsx', engine='xlsxwriter')
 
 if __name__ == '__main__':
