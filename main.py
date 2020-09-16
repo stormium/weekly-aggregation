@@ -1,3 +1,8 @@
+import os
+# Set spark environments
+os.environ['PYSPARK_PYTHON'] = '/usr/bin/python3.8'
+os.environ['PYSPARK_DRIVER_PYTHON'] = '/usr/bin/python3.8'
+
 import pandas
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
@@ -10,7 +15,7 @@ def init_spark():
   return spark,sc
 
 #helper f-ions
-def step_adds_week_partition(input):
+def step_adds_week_partition(input):    # adds week partition col in format 'yyyyMMdd'
     output = input \
         .withColumn('dt', date_trunc('week', 'order_date')) \
         .withColumn('dt', date_format('dt', 'yyyyMMdd'))
@@ -21,16 +26,8 @@ def step_look_for_delivery_fee_col(df): #adds empty delivery fee col into input 
         df['order_delivery_fee'] = 0
     return df
 
-def main():
-    spark,sc = init_spark()
-
-    excel_data_df = pandas.read_excel('input_data.xlsx', sheet_name='orders_daily_sample')
-    df = step_look_for_delivery_fee_col(excel_data_df)
-    sdf = spark.createDataFrame(df)
-    sdf1 = step_adds_week_partition(sdf)
-
-    #main aggregation goes here
-    sdf2 = sdf1 \
+def step_main_aggr(sdf):                #main aggregation goes here
+    output = sdf \
     .groupBy('customer_id','dt') \
     .agg(
         ###- order_executed_count -###
@@ -191,8 +188,18 @@ def main():
         )
         .alias('order_count_w_packaging_fee')
     )
+    return output
 
-    sdf2.toPandas().to_excel('output1.xlsx', engine='xlsxwriter')
+def main():
+    spark,sc = init_spark()
+
+    excel_data_df = pandas.read_excel('input_data.xlsx', sheet_name='orders_daily_sample')
+    df = step_look_for_delivery_fee_col(excel_data_df)
+    sdf = spark.createDataFrame(df)
+    sdf = step_adds_week_partition(sdf)
+    sdf.show()
+    sdf = step_main_aggr(sdf)
+    sdf.toPandas().to_excel('output1.xlsx', engine='xlsxwriter')
 
 if __name__ == '__main__':
   main()
